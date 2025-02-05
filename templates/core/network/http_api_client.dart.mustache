@@ -1,0 +1,107 @@
+// lib/network/http_api_client.dart
+import 'package:http/http.dart' as http;
+import 'api_client.dart.mustache';
+import '../../../lib/templates/core/network/network_response.dart';
+
+class HttpApiClient implements ApiClient {
+  final String baseUrl;
+  Map<String, String> defaultHeaders;
+
+  HttpApiClient({
+    required this.baseUrl,
+    this.defaultHeaders = const {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+  });
+
+  Uri _buildUri(String path, [Map<String, dynamic>? queryParameters]) {
+    final uri = Uri.parse('$baseUrl$path');
+    return queryParameters != null
+        ? uri.replace(
+            queryParameters:
+                queryParameters.map((k, v) => MapEntry(k, v.toString())))
+        : uri;
+  }
+
+  @override
+  Future<NetworkResponse> get(String path,
+      {Map<String, dynamic>? queryParameters}) async {
+    try {
+      final uri = _buildUri(path, queryParameters);
+      final response = await http.get(uri, headers: defaultHeaders);
+      return NetworkResponse(
+        statusCode: response.statusCode,
+        data: response.body,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> post(String path,
+      {Map<String, dynamic>? data}) async {
+    try {
+      final uri = _buildUri(path);
+      final response = await http.post(uri,
+          headers: defaultHeaders, body: data != null ? data : null);
+      return NetworkResponse(
+        statusCode: response.statusCode,
+        data: response.body,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> put(String path, {Map<String, dynamic>? data}) async {
+    try {
+      final uri = _buildUri(path);
+      final response = await http.put(uri,
+          headers: defaultHeaders, body: data != null ? data : null);
+      return NetworkResponse(
+        statusCode: response.statusCode,
+        data: response.body,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> delete(String path) async {
+    try {
+      final uri = _buildUri(path);
+      final response = await http.delete(uri, headers: defaultHeaders);
+      return NetworkResponse(
+        statusCode: response.statusCode,
+        data: response.body,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> patch(String path,
+      {Map<String, dynamic>? data}) async {
+    try {
+      final uri = _buildUri(path);
+      final response = await http.patch(uri,
+          headers: defaultHeaders, body: data != null ? data : null);
+      return NetworkResponse(
+        statusCode: response.statusCode,
+        data: response.body,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<void> setToken(String token) async {
+    defaultHeaders["Authorization"] = "Bearer $token";
+  }
+}

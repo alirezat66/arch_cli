@@ -1,0 +1,14 @@
+import 'package:mvvm_cli/templates/core/network/network_response.dart';
+
+abstract class ApiClient {
+  Future<NetworkResponse> get(String path,
+      {Map<String, dynamic>? queryParameters});
+  Future<NetworkResponse> post(String path, {Map<String, dynamic>? data});
+  Future<NetworkResponse> put(String path, {Map<String, dynamic>? data});
+  Future<NetworkResponse> delete(String path);
+  Future<NetworkResponse> patch(String path, {Map<String, dynamic>? data});
+
+  /// Sets the authorization token for subsequent requests.
+  Future<void> setToken(String token);
+
+}

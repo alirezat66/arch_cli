@@ -1,0 +1,98 @@
+// lib/network/dio_api_client.dart
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:flutter/foundation.dart';
+import '../../../lib/templates/core/network/api_client.dart';
+import '../../../lib/templates/core/network/network_response.dart';
+
+class DioApiClient implements ApiClient {
+  final Dio _dio;
+
+  DioApiClient(String baseUrl)
+      : _dio = Dio(BaseOptions(
+          baseUrl: baseUrl,
+          receiveDataWhenStatusError: true,
+          connectTimeout: const Duration(seconds: 120),
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+        )) {
+    initLogger();
+    setErrorHandler();
+  }
+
+  @override
+  Future<NetworkResponse> get(String path,
+      {Map<String, dynamic>? queryParameters}) async {
+    try {
+      final response = await _dio.get(path, queryParameters: queryParameters);
+      return NetworkResponse(
+        statusCode: response.statusCode ?? 200,
+        data: response.data,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> post(String path,
+      {Map<String, dynamic>? data}) async {
+    try {
+      final response = await _dio.post(path, data: data);
+      return NetworkResponse(
+        statusCode: response.statusCode ?? 200,
+        data: response.data,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> put(String path, {Map<String, dynamic>? data}) async {
+    try {
+      final response = await _dio.put(path, data: data);
+      return NetworkResponse(
+        statusCode: response.statusCode ?? 200,
+        data: response.data,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> delete(String path) async {
+    try {
+      final response = await _dio.delete(path);
+      return NetworkResponse(
+        statusCode: response.statusCode ?? 200,
+        data: response.data,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<NetworkResponse> patch(String path,
+      {Map<String, dynamic>? data}) async {
+    try {
+      final response = await _dio.patch(path, data: data);
+      return NetworkResponse(
+        statusCode: response.statusCode ?? 200,
+        data: response.data,
+      );
+    } catch (e) {
+      return NetworkResponse(statusCode: 500, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<void> setToken(String token) async {
+    _dio.options.headers["Authorization"] = "Bearer $token";
+  }
+}
