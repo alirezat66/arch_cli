@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:mustache_template/mustache.dart';
 import 'package:mvvm_cli/commands/command.dart';
 import 'package:mvvm_cli/model/file_model.dart';
+import 'package:mvvm_cli/utils/logger.dart';
 import 'package:path/path.dart' as p;
 
 class CommandRunner {
@@ -20,9 +21,9 @@ class CommandRunner {
     for (final directory in command.directories) {
       try {
         directory.createSync(recursive: true);
-        print('Created directory: ${directory.path}');
+        logger.info('Created directory: ${directory.path}');
       } catch (e) {
-        print('Failed to create directory ${directory.path}: $e');
+        logger.info('Failed to create directory ${directory.path}: $e');
       }
     }
 
@@ -39,13 +40,13 @@ class CommandRunner {
   }
 
   void generateFile(FileModel file) {
-    print('Current working directory: ${Directory.current.path}');
-    print('Script path: ${Platform.script.toFilePath()}');
-    print("this is path:");
-    print(file.templatePath);
+    logger.detail('Current working directory: ${Directory.current.path}');
+    logger.detail('Script path: ${Platform.script.toFilePath()}');
+    logger.detail("this is path:");
+    logger.detail(file.templatePath);
     final templateFile = File(file.templatePath);
     if (!templateFile.existsSync()) {
-      print('Template file not found: ${file.templatePath}');
+      logger.err('Template file not found: ${file.templatePath}');
       return;
     }
     final templateContent = templateFile.readAsStringSync();

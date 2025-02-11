@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:mustache_template/mustache.dart';
 import 'package:mvvm_cli/model/file_model.dart';
+import 'package:mvvm_cli/utils/logger.dart';
 
 import 'command.dart';
 
@@ -19,24 +20,44 @@ class CreateCommand implements Command {
 
   @override
   Future<void> execute(List<String> args) async {
+    logger.info('Create command executed!');
+    logger.space(1);
+
+    final String projectName;
+
     if (args.isEmpty) {
-      print('Please provide a project name.');
-      exit(1);
+      logger.info(
+          'Project name is required. In the following prompt, enter name of the project.');
+
+      final result = logger.promptWithValidation(
+        message: 'Enter project name:',
+        validator: (input) {
+          if (input.trim().isEmpty) {
+            return 'Project name cannot be empty';
+          }
+          if (input.contains(' ')) {
+            return 'Project name cannot contain spaces';
+          }
+          return null;
+        },
+      );
+
+      projectName = result;
+    } else {
+      projectName = args[0];
     }
 
-    final projectName = args.first;
-    // Prompt for networking choice:
-    stdout.write('Select networking library (1 = http, 2 = dio): ');
-    final choice = stdin.readLineSync();
-    String networkingLib;
-    if (choice == '1') {
-      networkingLib = 'http';
-    } else if (choice == '2') {
-      networkingLib = 'dio';
-    } else {
-      print('Invalid choice, defaulting to http.');
-      networkingLib = 'http';
-    }
+    logger.space(2);
+
+    logger.info('Provided project name: $projectName');
+
+    const httpClientOptions = ['http', 'dio'];
+    final networkingLib = logger.chooseOne<String>(
+      'Select networking library',
+      choices: httpClientOptions,
+      defaultValue: 'http',
+    );
+
     _dictionaries = [
       Directory('$projectName/lib/core/network'),
       Directory('$projectName/lib/core/di'),
@@ -47,10 +68,10 @@ class CreateCommand implements Command {
     _fileModels.add(_generateConsts(projectName));
     _fileModels.addAll(_generateNetworks(projectName, networkingLib));
     _fileModels.add(_generateMain(projectName));
-    
+
     final projectDir = Directory(projectName);
     if (projectDir.existsSync()) {
-      print('Error: Directory "$projectName" already exists.');
+      logger.err('Error: Directory "$projectName" already exists.');
       exit(1);
     }
     projectDir.createSync();
@@ -111,9 +132,9 @@ class CreateCommand implements Command {
     for (final directory in directories) {
       try {
         directory.createSync(recursive: true);
-        print('Created directory: ${directory.path}');
+        logger.info('Created directory: ${directory.path}');
       } catch (e) {
-        print('Failed to create directory ${directory.path}: $e');
+        logger.err('Failed to create directory ${directory.path}: $e');
       }
     }
 
@@ -126,7 +147,7 @@ class CreateCommand implements Command {
   static void generateFile(FileModel fileModel) {
     final templateFile = File(fileModel.templatePath);
     if (!templateFile.existsSync()) {
-      print('Template file not found: $fileModel.templatePath');
+      logger.err('Template file not found: $fileModel.templatePath');
       return;
     }
     final templateContent = templateFile.readAsStringSync();

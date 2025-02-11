@@ -5,6 +5,7 @@ import 'package:args/args.dart';
 
 import 'package:mvvm_cli/commands/command_runner.dart';
 import 'package:mvvm_cli/commands/create_command.dart';
+import 'package:mvvm_cli/utils/logger.dart';
 
 Future<void> main(List<String> arguments) async {
   // Step 1: Set up the argument parser.
@@ -16,23 +17,19 @@ Future<void> main(List<String> arguments) async {
   try {
     argResults = parser.parse(arguments);
   } on FormatException catch (e) {
-    print('Error parsing arguments: ${e.message}');
+    logger.err('Error parsing arguments: ${e.message}');
     exit(1);
   }
 
   // Step 3: Ensure a command is provided.
   if (argResults.command == null) {
-    print('No command provided.');
-    print('Usage: mvvm_cli <command> [arguments]');
+    logger.err('No command provided.');
+    logger.err('Usage: mvvm_cli <command> [arguments]');
     exit(1);
   }
 
   // Step 4: Handle the "create" command.
   if (argResults.command!.name == 'create') {
-    if (argResults.command!.rest.isEmpty) {
-      print('Please provide a project name.');
-      exit(1);
-    }
     // Create an instance of your CreateCommand.
     final command = CreateCommand();
 
@@ -43,8 +40,8 @@ Future<void> main(List<String> arguments) async {
     final runner = CommandRunner(command);
     await runner.run(argResults.command!.rest);
   } else {
-    print('Unknown command: ${argResults.command!.name}');
-    print('Usage: mvvm_cli <command> [arguments]');
+    logger.err('Unknown command: ${argResults.command!.name}');
+    logger.err('Usage: mvvm_cli <command> [arguments]');
     exit(1);
   }
 }
