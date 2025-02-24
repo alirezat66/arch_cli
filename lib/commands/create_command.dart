@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mustache_template/mustache.dart';
-import 'package:mvvm_cli/model/file_model.dart';
-import 'package:mvvm_cli/utils/logger.dart';
+import 'package:arch_cli/model/file_model.dart';
+import 'package:arch_cli/utils/logger.dart';
 
 class CreateCommand extends Command<int> {
   @override
-  final String description = 'Create a new MVVM project structure';
+  final String description = 'Create a new flutter project structure';
 
   @override
   final String name = 'create';

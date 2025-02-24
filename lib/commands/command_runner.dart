@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
-import 'package:mvvm_cli/commands/create_command.dart';
-import 'package:mvvm_cli/utils/logger.dart';
+import 'package:arch_cli/commands/create_command.dart';
+import 'package:arch_cli/utils/logger.dart';
 
 class CliCommandRunner extends CommandRunner<int> {
   CliCommandRunner()

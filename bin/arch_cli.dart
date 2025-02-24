@@ -2,7 +2,7 @@ import 'dart:io';
 
 // Import your command-related classes.
 
-import 'package:mvvm_cli/commands/command_runner.dart';
+import 'package:arch_cli/commands/command_runner.dart';
 
 Future<void> main(List<String> arguments) async {
   final runner = CliCommandRunner();
