@@ -1,10 +1,7 @@
 // lib/network/dio_api_client.dart
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:flutter/foundation.dart';
-import '../../../lib/templates/core/network/api_client.dart';
-import '../../../lib/templates/core/network/network_response.dart';
+import 'api_client.dart';
+import 'network_response.dart';
 
 class DioApiClient implements ApiClient {
   final Dio _dio;
@@ -18,11 +15,7 @@ class DioApiClient implements ApiClient {
             "Content-Type": "application/json",
             "Accept": "application/json",
           },
-        )) {
-    initLogger();
-    setErrorHandler();
-  }
-
+        ));
   @override
   Future<NetworkResponse> get(String path,
       {Map<String, dynamic>? queryParameters}) async {

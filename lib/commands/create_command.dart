@@ -130,7 +130,7 @@ class CreateCommand extends Command<int> {
     final data = {
       'projectName': projectName,
       'networkingDependency': networkingLib == 'dio'
-          ? 'dio: ^4.0.0\n  pretty_dio_logger: ^1.4.0'
+          ? 'dio: ^5.8.0+1\n  pretty_dio_logger: ^1.4.0'
           : 'http: ^1.3.0',
     };
     return FileModel(
@@ -153,14 +153,17 @@ class CreateCommand extends Command<int> {
     final networkTemplate = networkingLib == 'dio'
         ? 'templates/core/network/dio_api_client.dart.mustache'
         : 'templates/core/network/dio_api_client.dart.mustache';
-
+    final String responseTemplate = 'templates/core/network/network_response.dart.mustache';
     return [
       FileModel(
           templatePath: networkAbstractionTemplate,
           destinationPath: '$projectName/lib/core/network/api_client.dart'),
       FileModel(
           templatePath: networkTemplate,
-          destinationPath: '$projectName/lib/core/network/network_client.dart')
+          destinationPath: '$projectName/lib/core/network/network_client.dart'),
+      FileModel(
+          templatePath: responseTemplate,
+          destinationPath: '$projectName/lib/core/network/network_response.dart')
     ];
   }
 
