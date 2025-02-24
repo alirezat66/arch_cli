@@ -134,15 +134,15 @@ class CreateCommand extends Command<int> {
           : 'http: ^1.3.0',
     };
     return FileModel(
-        templatePath: 'templates/pubspec.yaml.mustache',
+        templatePath: 'templates/basics/pubspec.yaml.mustache',
         destinationPath: '$projectName/pubspec.yaml',
         parameters: data);
   }
 
   FileModel _generateConsts(String projectName) {
     return FileModel(
-        templatePath: 'templates/core/constants.dart.mustache',
-        destinationPath: '$projectName/lib/core/constants.dart',
+        templatePath: 'templates/core/app_constants.dart.mustache',
+        destinationPath: '$projectName/lib/core/constants/app_constants.dart',
         parameters: {'projectName': projectName});
   }
 
