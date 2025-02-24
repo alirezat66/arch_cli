@@ -5,7 +5,7 @@ import 'package:arch_cli/utils/logger.dart';
 
 class CliCommandRunner extends CommandRunner<int> {
   CliCommandRunner()
-      : super('mvvm_cli', 'CLI tool for generating MVVM project structure') {
+      : super('arch_cli', 'CLI tool for generating MVVM project structure') {
     // Add your flags like this
     argParser.addFlag(
       'verbose',
