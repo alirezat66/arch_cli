@@ -12,12 +12,6 @@ class CreateCommand extends Command<int> {
   @override
   final String name = 'create';
 
-  List<Directory> _directories = [];
-  final List<FileModel> _fileModels = [];
-
-  List<Directory> get directories => _directories;
-  List<FileModel> get fileModels => _fileModels;
-
   @override
   Future<int> run() async {
     try {
