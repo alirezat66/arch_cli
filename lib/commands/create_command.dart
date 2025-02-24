@@ -21,82 +21,32 @@ class CreateCommand extends Command<int> {
   @override
   Future<int> run() async {
     try {
-      logger.info('Create command executed!');
+      logger.info('Creating a new Flutter MVVM project...');
       logger.space(1);
 
-      final String projectName;
       final args = argResults?.rest ?? [];
 
-      if (args.isEmpty) {
-        logger.info(
-            'Project name is required. In the following prompt, enter name of the project.');
-
-        final result = logger.promptWithValidation(
-          message: 'Enter project name:',
-          validator: (input) {
-            if (input.trim().isEmpty) {
-              return 'Project name cannot be empty';
-            }
-            if (input.contains(' ')) {
-              return 'Project name cannot contain spaces';
-            }
-            return null;
-          },
-        );
-
-        projectName = result;
-      } else {
-        projectName = args[0];
-      }
+      String projectName = args.isNotEmpty ? args[0] : _promptForProjectName();
 
       final projectDir = Directory(projectName);
       if (projectDir.existsSync()) {
         logger.err('Error: Directory "$projectName" already exists.');
         return ExitCode.ioError.code;
       }
-
-      projectDir.createSync();
-
-      logger.space(2);
-
-      logger.info('Provided project name: $projectName');
-
-      const httpClientOptions = ['http', 'dio'];
-      final networkingLib = logger.chooseOne<String>(
-        'Select networking library',
-        choices: httpClientOptions,
-        defaultValue: 'http',
-      );
-
-      _directories = [
-        Directory('$projectName/lib/core/network'),
-        Directory('$projectName/lib/core/di'),
-        Directory('$projectName/lib/core'),
-        Directory('$projectName/lib')
-      ];
-
-      _fileModels.add(_generateYaml(projectName, networkingLib));
-      _fileModels.add(_generateConsts(projectName));
-      _fileModels.addAll(_generateNetworks(projectName, networkingLib));
-      _fileModels.add(_generateMain(projectName));
-
-      // Create directories
-      for (final directory in directories) {
-        try {
-          directory.createSync(recursive: true);
-          logger.info('Created directory: ${directory.path}');
-        } catch (e) {
-          logger.err('Failed to create directory ${directory.path}: $e');
-          return ExitCode.ioError.code;
-        }
+      // Step 1: Run `flutter create projectName`
+      if (!_createFlutterProject(projectName)) {
+        return ExitCode.software.code;
       }
 
-      // Generate files
-      for (final file in fileModels) {
-        if (!_generateFile(file)) {
-          return ExitCode.ioError.code;
-        }
-      }
+      // Step 2: Ask user for networking library
+      final networkingLib = _promptForNetworkingLibrary();
+
+      // Step 3: Add basic directories
+      _addBasicDirectories(projectName);
+
+      // Step 4: Modify necessary files using templates
+      _generateBasicFiles(projectName, networkingLib);
+
 
       logger.info('Project created successfully!');
       return ExitCode.success.code;
@@ -104,6 +54,30 @@ class CreateCommand extends Command<int> {
       logger.err('Error creating project: $e');
       return ExitCode.software.code;
     }
+  }
+
+  /// Runs `flutter create projectName`
+  bool _createFlutterProject(String projectName) {
+    try {
+      final result = Process.runSync('flutter', ['create', projectName]);
+      if (result.exitCode != 0) {
+        logger.err('Failed to create Flutter project: ${result.stderr}');
+        return false;
+      }
+      logger.info('Flutter project created successfully.');
+      return true;
+    } catch (e) {
+      logger.err('Error running flutter create: $e');
+      return false;
+    }
+  }
+
+  String _promptForNetworkingLibrary() {
+    return logger.chooseOne<String>(
+      'Select networking library',
+      choices: ['http', 'dio'],
+      defaultValue: 'http',
+    );
   }
 
   bool _generateFile(FileModel fileModel) {
@@ -153,7 +127,8 @@ class CreateCommand extends Command<int> {
     final networkTemplate = networkingLib == 'dio'
         ? 'templates/core/network/dio_api_client.dart.mustache'
         : 'templates/core/network/dio_api_client.dart.mustache';
-    final String responseTemplate = 'templates/core/network/network_response.dart.mustache';
+    final String responseTemplate =
+        'templates/core/network/network_response.dart.mustache';
     return [
       FileModel(
           templatePath: networkAbstractionTemplate,
@@ -163,7 +138,8 @@ class CreateCommand extends Command<int> {
           destinationPath: '$projectName/lib/core/network/network_client.dart'),
       FileModel(
           templatePath: responseTemplate,
-          destinationPath: '$projectName/lib/core/network/network_response.dart')
+          destinationPath:
+              '$projectName/lib/core/network/network_response.dart')
     ];
   }
 
@@ -172,5 +148,47 @@ class CreateCommand extends Command<int> {
         templatePath: 'templates/main.dart.mustache',
         destinationPath: '$projectName/lib/main.dart',
         parameters: {'projectName': projectName});
+  }
+
+  String _promptForProjectName() {
+    return logger.promptWithValidation(
+      message: 'Enter project name:',
+      validator: (input) {
+        if (input.trim().isEmpty) return 'Project name cannot be empty';
+        if (input.contains(' ')) return 'Project name cannot contain spaces';
+        return null;
+      },
+    );
+  }
+
+  void _addBasicDirectories(String projectName) {
+    final directories = [
+      '$projectName/lib/core',
+      '$projectName/lib/core/network',
+      '$projectName/lib/core/di',
+      '$projectName/lib/data',
+      '$projectName/lib/domain',
+      '$projectName/lib/presentation',
+      '$projectName/lib/utils',
+    ];
+
+    for (final dirPath in directories) {
+      final dir = Directory(dirPath);
+      dir.createSync(recursive: true);
+      logger.info('Created folder: $dirPath');
+    }
+  }
+
+  void _generateBasicFiles(String projectName, String networkingLib) {
+    final fileModels = [
+      _generateYaml(projectName, networkingLib),
+      _generateConsts(projectName),
+      _generateMain(projectName),
+      ..._generateNetworks(projectName, networkingLib),
+    ];
+
+    for (final file in fileModels) {
+      _generateFile(file);
+    }
   }
 }
