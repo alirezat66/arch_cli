@@ -1,5 +1,6 @@
 name: arch_cli
-description: A sample command-line application.
+description: A CLI tool for generating Flutter project templates quickly and efficiently.
+
 version: 0.0.1
 # repository: https://github.com/my_org/my_repo
 
